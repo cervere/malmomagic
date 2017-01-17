@@ -15,11 +15,8 @@ so that MalmoPlatform.so is accessible to your malmo programs
 Done!
 ```
 
-For every tiny program/situation/scenario our heroine is in, lets have a folder 
+For every tiny program/situation/scenario our agent is in, lets have a folder 
 
-`./<< some sensible experiment name >>`
+`./<<some sensible experiment NAME>>/NAME.py`
 
-with a README file which would describe what that whole experiment is all about (in a human readable format)
-
-`./<< the same sensible experiment name used above >>/README.md`
-
+and make sure you give some description about what the agent is trying to do in that scenario
