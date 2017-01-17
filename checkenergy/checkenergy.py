@@ -249,24 +249,22 @@ for iRepeat in range(num_reps):
                     SetTurn(1)      # Start turning
         print "checking : %s, count : %s" % (str(checking), str(count))
         if count%10 == 0 and energy > 0:
-            energy -= 1
+            energy -= 1 
             SendChat("Energy spent moving. My energy : " + str(energy))
         if not checking and energy <= 5:
 	    SetVelocity(0)
 	    checking = True
 	    checked = False
+            turning = True
             turntime=10
-        #if True :
         if checking :
-            #if turntime > 5 : SetTurn(1)
-            #if turntime <= 5: SetTurn(-1)
             turntime -= 1  # Decrement the turn count
             if turntime == 0 and energy >= 0:
                 SetTurn(0)  # Stop turning
 	        checked = True
                 energy += 15
                 checking = False
-        print "Count : %s, Turntime : %s" % (str(count), str(turntime))
+        print "Count : %s, Turntime : %s, energy : %s" % (str(count), str(turntime), str(energy))
         time.sleep(0.1)
 
     # mission has ended.
