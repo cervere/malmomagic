@@ -8,9 +8,9 @@ Assuming you have already installed Malmo, every python program you want to run 
 
 So this file is available in the current folder. Run the following for the programs to be able to access it.
  
-'''
-cervere@cervere:~/Documents/dirtest$ python setup.py ; source ~/.bashrc 
-Adding current dir /home/cervere/Documents/dirtest to PYTHONPATH in your bashrc so that MalmoPlatform.so is accesible to your malmo programs
+`
+$ python setup.py ; source ~/.bashrc 
+Adding current dir ./malmomagic to PYTHONPATH in your bashrc so that MalmoPlatform.so is accessible to your malmo programs
 Done!
 '''
 
@@ -22,4 +22,3 @@ with a README file which would describe what that whole experiment is all about 
 
 `./<< the same sensible experiment name used above >>/README.md`
 
-For now  
