@@ -10,7 +10,8 @@ So this file is available in the current folder. Run the following for the progr
  
 ```
 $ python setup.py ; source ~/.bashrc 
-Adding current dir ./malmomagic to PYTHONPATH in your bashrc so that MalmoPlatform.so is accessible to your malmo programs
+Adding current dir ./malmomagic to PYTHONPATH in your bashrc
+so that MalmoPlatform.so is accessible to your malmo programs
 Done!
 ```
 
