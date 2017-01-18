@@ -1,4 +1,4 @@
-# ------------------------------------------------------------------------------------------------
+
 # Copyright (c) 2016 Microsoft Corporation
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -53,6 +53,14 @@ def GetMissionXML(summary, itemDrawingXML):
 		    <DrawBlock x="0"  y="226" z="29" type="lava" />
 		    <DrawBlock x="0"  y="226" z="39" type="lava" />
 		    <DrawBlock x="0"  y="226" z="50" type="lapis_block" />
+		    <DrawBlock x="5"  y="226" z="4" type="lapis_block" />
+		    <DrawBlock x="5"  y="226" z="-4" type="lapis_block" />
+		    <DrawBlock x="9"  y="226" z="0" type="lapis_block" />
+		    <DrawBlock x="1"  y="226" z="0" type="lapis_block" />
+		    <DrawBlock x="8"  y="226" z="3" type="lapis_block" />
+		    <DrawBlock x="8"  y="226" z="-3" type="lapis_block" />
+		    <DrawBlock x="2"  y="226" z="3" type="lapis_block" />
+		    <DrawBlock x="2"  y="226" z="-3" type="lapis_block" />
                     ''' + itemDrawingXML + '''
                 </DrawingDecorator>
                 <ServerQuitFromTimeUp timeLimitMs="15000"/>
@@ -63,13 +71,14 @@ def GetMissionXML(summary, itemDrawingXML):
         <AgentSection mode="Survival">
             <Name>The Hungry Caterpillar</Name>
             <AgentStart>
-                <Placement x="0.5" y="227.0" z="0.5"/>
+                <Placement x="5.5" y="227.0" z="0.5"/>
                 <Inventory>
                 </Inventory>
             </AgentStart>
             <AgentHandlers>
                 <InventoryCommands/>
                 <ChatCommands/>
+                <AbsoluteMovementCommands/>
                 <DiscreteMovementCommands />
                 <VideoProducer>
                     <Width>480</Width>
@@ -81,7 +90,8 @@ def GetMissionXML(summary, itemDrawingXML):
                     <Item reward="-1" type="apple melon"/>
                     <Item reward="-2" type="sugar cake cookie pumpkin_pie"/>
                 </RewardForCollectingItem>
-                <ContinuousMovementCommands turnSpeedDegs="90"/>
+                <ContinuousMovementCommands turnSpeedDegs="50"/>
+                <ObservationFromFullStats/>
                 <ObservationFromNearbyEntities>
                     <Range name="close_entities" xrange="2" yrange="2" zrange="2" />
                     <Range name="far_entities" xrange="10" yrange="2" zrange="10" update_frequency="100"/>
@@ -92,9 +102,9 @@ def GetMissionXML(summary, itemDrawingXML):
                         <max x="1" y="-1" z="1"/>
                       </Grid>
                   </ObservationFromGrid>
-      <AgentQuitFromTouchingBlockType>
+      <!--AgentQuitFromTouchingBlockType>
           <Block type="lapis_block" />
-      </AgentQuitFromTouchingBlockType>
+      </AgentQuitFromTouchingBlockType-->
 
             </AgentHandlers>
         </AgentSection>
@@ -195,27 +205,36 @@ for iRepeat in range(num_reps):
 
     reward = 0.0    # keep track of reward for this mission.
     turncount = 0   # for counting turn time.
-    # start running:
-    checking=False
-    checked=True
-    count = 0
-    turntime = 0
-    energy = 20 # dE/dcount = 1/10 units
-    # main loop:
-    #if checked : SetVelocity(1)
+    count = 0   # for counting turn time.
+    waitCycles = 0
+    turnSequence  = "move 1; wait 10;"# wait 10; move 0; " 
+    #turnSequence += "turn 1; wait 10; turn 0; "
+    #turnSequence  = "move 1; wait 10; move 0; " 
+    turnSequence += "setYaw 45; wait 10;"
+    #turnSequence += "tp 2.5 227 3.5; "
+    #turnSequence += "turn -0.5; wait 10; turn 0; "
+    turnSequence += "setYaw -45; wait 10;"
+    #turnSequence += "move 1; wait 10; move 0; "
+    #turnSequence += "tp 5.5 227 6.5; "
+    turnSequence += "setYaw 0; "
+    #turnSequence += "turn -1; ang -45; "
+    #turnSequence += "move 1; wait 10; move 0; "
+    #turnSequence += "turn 0;"
+    #turnSequence += "move 1; wait 100; move 0; "
+    currentSequence = turnSequence
     while world_state.is_mission_running:
         world_state = agent_host.getWorldState()
-        if not energy :
-	    SetVelocity(0)
-	    SendChat("Cannot move anymore. No ENERGY!!")
-        if checked :
-	    count += 1
-	    SetVelocity(1)
         if world_state.number_of_observations_since_last_state > 0:
+            if waitCycles > 0: waitCycles -= 1
             msg = world_state.observations[-1].text
             ob = json.loads(msg)
+            current_x = ob.get(u'XPos', 0)
+            current_z = ob.get(u'ZPos', 0)
+            current_y = ob.get(u'YPos', 0)
+            yaw = ob.get(u'Yaw', 0)
+            pitch = ob.get(u'Pitch', 0)
             grid = ob.get(u'floor3x3', 0)
-            print grid
+            print  yaw 
             if "close_entities" in ob:
                 entities = [EntityInfo(**k) for k in ob["close_entities"]]
                 for ent in entities:
@@ -248,28 +267,25 @@ for iRepeat in range(num_reps):
                 else:               # Turn right
                     turncount = 1+turncount
                     SetTurn(1)      # Start turning
-        print "checking : %s, count : %s" % (str(checking), str(count))
-        if count%10 == 0 and energy > 0:
-            energy -= 1 
-            SendChat("Energy spent moving. My energy : " + str(energy))
-        if not checking and energy <= 5:
-	    SetVelocity(0)
-	    checking = True
-	    checked = False
-            turning = True
-            turntime=10
-        if checking :
-            turntime -= 1  # Decrement the turn count
-            if turntime == 0 and energy >= 0:
-                SetTurn(0)  # Stop turning
-	        checked = True
-                energy += 15
-                checking = False
-        print "Count : %s, Turntime : %s, energy : %s" % (str(count), str(turntime), str(energy))
+        if waitCycles == 0:
+        # Time to execute the next command, if we have one:
+            if currentSequence != "":
+                commands = currentSequence.split(";", 1)
+                command = commands[0].strip()
+                if len(commands) > 1:
+                    currentSequence = commands[1]
+                else:
+                    currentSequence = ""
+                verb,sep,param = command.partition(" ")
+                if verb == "wait":  
+                    waitCycles = int(param.strip())
+                else:
+                    agent_host.sendCommand(command) # Send the command to Minecraft.
+
         time.sleep(0.1)
 
     # mission has ended.
-    print "Count "+ str(count) + ", Mission " + str(iRepeat+1) + ": Reward = " + str(reward)
+    print "Mission " + str(iRepeat+1) + ": Reward = " + str(reward)
     for error in world_state.errors:
         print "Error:",error.text
     time.sleep(0.5) # Give the mod a little time to prepare for the next mission.
